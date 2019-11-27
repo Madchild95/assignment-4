@@ -58,7 +58,7 @@ N.B. to give you a bit more data I included data from previous years (Study1, St
 ```{r}
 # Load the libraries
 library(pacman, tidyverse)
-p_load(ggplot2, gridExtra, tidyverse, groupdata2, purr, stats)
+p_load(ggplot2, gridExtra, tidyverse, groupdata2, purr, stats, lme4, lmerTest)
 
 # Load the file
 s1_t1 <- read.csv("Data/Study1_G1_T1_Synchronous.csv")
@@ -225,7 +225,7 @@ data_preprocess <- function(filename, threshold = 3){
   # downsample
   file$row <- seq.int(nrow(file))
   file <- file %>%
-  group(n = 100, method = 'greedy') %>%
+  group(n = 1000, method = 'greedy') %>%
   dplyr::summarise(
     time = mean(time,na.rm=T),
     HR1 = mean(HR1,na.rm=T),
@@ -242,7 +242,7 @@ data_preprocess <- function(filename, threshold = 3){
   # identifying and removing trials below a certain treshold
   dup_detector1 <- ifelse(duplicated(data$Resp1)==T,"duplicate","not-duplicate")
   dup_detector2 <- ifelse(duplicated(data$Resp2)==T,"duplicate","not-duplicate")
-   if(sum(dup_detector1=="duplicate") >= 100 | sum(dup_detector2=="duplicate") >= 100) {
+   if(sum(dup_detector1=="duplicate") >= 8 | sum(dup_detector2=="duplicate") >= 8) {
     file$Resp1 <- NA
     file$Resp2 <- NA
    } 
@@ -253,7 +253,7 @@ data_preprocess <- function(filename, threshold = 3){
 
 # test it on just one file while writing the function
 test_data <- data_preprocess("Data/Study1_G2_T1_TurnTaking.csv")
-test_read <- read.csv("Data/Study1_G1_T2_TurnTaking.csv")
+test_read <- data_preprocess("Data/Study1_G1_T1_Synchronous.csv")
 
 #  Identify all files to be read
 # Run the function on the whole dataset using map_df
@@ -263,6 +263,7 @@ phys_data <- list.files(path = "/Users/matilde/Desktop/AU/Experimental Methods I
 
 After preprocess we need to assess the data and change some variables
 ```{r}
+phys_data_up <- phys_data
 # Making a unique pair ID
 phys_data$study <- as.numeric(phys_data$study)
 phys_data$group <- as.numeric(phys_data$group)
@@ -281,7 +282,13 @@ phys_data <- phys_data %>% group_by(uPairID, trial) %>% mutate(actual_time_min =
 colnames(phys_data)[7] <- "time_min"
 
 # Argumentation for why we use 100 as threashold
-overview <- phys_data %>% 
+overview <- phys_data_up %>% 
+  group_by(file) %>% 
+  summarise(
+    sum(duplicated(Resp1)),
+    sum(duplicated(Resp2)))
+
+overview_down <- phys_data %>% 
   group_by(file) %>% 
   summarise(
     sum(duplicated(Resp1)),
@@ -303,6 +310,11 @@ phys_data %>% subset(study==4) %>%
   geom_line(aes(actual_time_min,Resp2),color="blue") + 
   facet_grid(group ~ trial)
 
+phys_data_up %>% subset(study==4) %>%
+  ggplot() + 
+  geom_line(aes(actual_time_min,Resp1),color="red") + 
+  geom_line(aes(actual_time_min,Resp2),color="blue") + 
+  facet_grid(group ~ trial)
 
 # Romove bad heart rate data
 # Removing after 3 min.
@@ -568,10 +580,58 @@ d_resp_other <-
 
 dd <- cbind(d_hr_change_self,d_hr_change_other,d_resp_change_self,d_resp_change_other,d_hr_future,d_resp_future,d_hr_self,d_hr_other,d_resp_self,d_resp_other) 
 dd <- dd %>%  select(actual_time_min,participant,group,condition,trial,study,HR_self,Resp_self,HR_other,Resp_other,HR_future,Resp_future,HR_change_self,HR_change_other,Resp_change_self,Resp_change_other)
+#Making participant unique for study
+dd$participant <- (dd$study * 1000)+dd$participant
+
 # Set the most interesting contrast e.g. by defining synchronous or conversation as the baseline
+# We only want to analyse study 4 - making a subset of the data
+dd4 <- subset(dd,study == 4)
+# Releveling with conversation as baseline
+dd4$condition <- as.factor(dd4$condition)
+dd4$condition <- relevel(dd4$condition, ref = "Conversation")
 
+ggplot(dd_single, aes(HR_self,HR_change_self)) +
+  geom_smooth(aes(HR_self, HR_other, method = "lm"))
+# effects
+# Plotting for single participant
+ggplot(data = dd_single, aes(x = HR_other, y = HR_change_self)) + geom_smooth(aes(HR_self, HR_other, method = "lm"))
+ggplot(data = dd_single) +
+  geom_point(aes(HR_self, HR_change_self, color = "HR_self")) +
+  geom_point(aes(HR_other, HR_change_self, color = "HR_other")) +
+  geom_smooth(aes(HR_self, HR_change_self, method = "lm", color = "HR_self")) +
+  geom_smooth(aes(HR_other, HR_change_self, method = "lm", color = "HR_other")) +
+  labs(x = "HR", y = "HR_change") +
+  theme(legend.position="bottom")  
+              
 # Model change as a function of own and other previous state 
+  #stability = beta HR_self
+  #coupling = beta HR_other
+  #baseline = surrogate pairs
 
+#Subset single participant 101
+dd_single <- subset(dd4, participant == 4101)
+
+#Single participant
+single_model1 <- lm(HR_change_self ~ 1 + HR_self + HR_other, data = dd_single)
+single_model1
+#Subset single group and run model
+dd_group1 <- subset(dd4, group == 1)
+model_group1 <- lmer(HR_change_self ~ 0 + condition + (HR_self + HR_other) : condition + 
+                          (0 + condition | participant), data = dd_group1)
+
+#Model for study 4 only
+model_study4 <- lmer(HR_change_self ~ 0 + condition + (HR_self + HR_other) : condition + 
+                          #we tell the model that we are not all the same. Accouting for independance of the                           data. Plus we are doing partial pooling.
+                          (0 + condition | group) +        
+                          (0 + condition | participant), data = dd4)
+#Model from interaction effect
+model_study4_interaction <- lmer(HR_change_self ~ 1 + condition + (HR_self + HR_other) * condition + 
+                          #we tell the model that we are not all the same. Accouting for independance of the                           data. Plus we are doing partial pooling.
+                          (1 + condition | group) +        
+                          (1 + condition | participant), data = dd4)
+summary(model_study4)
+summary(model_study4_interaction)
+#alternative main effect instead of HR_other = HR_other-self
 
 # Bonus points: Add to the previous model also change in the other to see whether my adaptation is influenced by the other's adaptation.
 
@@ -590,10 +650,13 @@ Tip: sample() is your friend, but make sure to shuffle things within participant
 ```{r}
 
 # Create a shuffled dataset
+
 # Concatenate it to the original dataset (and remember to have a column telling you which is which)
 
 # Create the same models as in the previous chunk, but adding an interaction by shuffled vs. real
-
+#The baseline by condition might vary by type
+model_control <- lmer(HR_change_self ~ 0 + (condition + (HR_self + HR_other) : condition) : type #surrogate vs. real + 
+                          (0 + condition | participant), data = dd)
 ```
  
  
@@ -605,12 +668,200 @@ Tip: sample() is your friend, but make sure to shuffle things within participant
 # Identify unique pairs within a given study (to keep things manageable) and create list of possible surrogate pairs (e.g. individual 1 from pair 1 and individual 2 from pair 2)
 
 # Starting from the wide format, create "surrogate" dataset with the data from surrogate pairs
+groups <- as.numeric(as.character(unique(dd$group[dd$study==4]))) # List all pairs
+SurrogateList <- expand.grid(a = groups, b = groups) # Identify all possible combinations of 2 pairs
+SurrogateList = subset(SurrogateList, a != b)  # exclude combinations with identical pairs
 
+phys_data4 <- subset(phys_data, study == 4)
+#Create new dataframe
+surrogate_data <- phys_data4[0,]
+
+for (i in 1:nrow(SurrogateList)){  # loop through all combinations
+  x <- subset(phys_data4, group==SurrogateList$a[i]) # subset data from the first pair    
+  y <- subset(phys_data4, group!=SurrogateList$a[i]) # subset data from the second pair   
+  newPairID <- c(800 + ((1:4)*i))                            
+  # create new pair id
+    for (co in c("Synchronous","TurnTaking","Conversation", "MovementCoop","MovementGuided")){ # loop through conditions
+    if (co %in% unique(x$condition) & co %in% unique(y$condition)){ # check that both pairs have the data for that condition
+      z1 <- subset(x, condition==co) # subset only that condtion from first pair
+      z2 <- subset(y, condition==co) # subset only that condtion from second pair
+      if (nrow(z1) > nrow(z2)) {	# make sure data have same length in both pairs
+        z1<-z1[1:nrow(z2),]
+        }
+      if (nrow(z2) > nrow(z1)) { 
+        z2<-z2[1:nrow(z1),]
+        }
+      w1 <- z1 %>% mutate(	# assemble new pair combining the 2 pairs
+        HR2 = z2$HR2,
+        Resp2 = z2$Resp2,
+        HR2_future = z2$HR2_future, 
+        Resp2_future = z2$Resp2_future, 
+        HR2_change = z2$HR2_change, 
+        Resp2_change = z2$Resp2_change)
+      # Saving data
+      if (nrow(surrogate_data) == 0) {
+        surrogate_data <- w1
+        }
+        else {
+          surrogate_data <- rbind(surrogate_data,w1)
+        } # make sure that you do this!
+}}}
 # Make it into long format
+hr_future <- 
+  gather(surrogate_data, # data        
+         participant, HR_future, # new vars
+         HR1_future, HR2_future) %>% #old vars
+  select( # drop irrelevant vars
+    actual_time_min, HR_future, participant, study, group, condition, trial) %>%
+  mutate( # create unique participant ID
+    participant = parse_number(as.character(group)) * 100 + 
+      parse_number(participant))
 
+resp_future <- 
+  gather(surrogate_data, # data        
+         participant, Resp_future, # new vars
+         Resp1_future, Resp2_future) %>% #old vars
+  select( # drop irrelevant vars
+    actual_time_min, Resp_future, participant, study, group, condition, trial) %>%
+  mutate( # create unique participant ID
+    participant = parse_number(as.character(group)) * 100 + 
+      parse_number(participant))
+
+hr_change_self <- 
+  gather(surrogate_data, # data        
+         participant, HR_change_self, # new vars
+         HR1_change, HR2_change) %>% #old vars
+  select( # drop irrelevant vars
+    actual_time_min, HR_change_self, participant, study, group, condition, trial) %>%
+  mutate( # create unique participant ID
+    participant = parse_number(as.character(group)) * 100 + 
+      parse_number(participant))
+
+resp_change_self <- 
+  gather(surrogate_data, # data        
+         participant, Resp_change_self, # new vars
+         Resp1_change, Resp2_change) %>% #old vars
+  select( # drop irrelevant vars
+    actual_time_min, Resp_change_self, participant, study, group, condition, trial) %>%
+  mutate( # create unique participant ID
+    participant = parse_number(as.character(group)) * 100 + 
+      parse_number(participant))
+
+hr_self <- 
+  gather(surrogate_data, # data        
+         participant, HR_self, # new vars
+         HR1, HR2) %>% #old vars
+  select( # drop irrelevant vars
+    actual_time_min, HR_self, participant, study, group, condition, trial) %>%
+  mutate( # create unique participant ID
+    participant = parse_number(as.character(group)) * 100 + 
+      parse_number(participant))
+
+resp_self <- 
+  gather(surrogate_data, # data        
+         participant, Resp_self, # new vars
+         Resp1, Resp2) %>% #old vars
+  select( # drop irrelevant vars
+    actual_time_min, Resp_self, participant, study, group, condition, trial) %>%
+  mutate( # create unique participant ID
+    participant = parse_number(as.character(group)) * 100 + 
+      parse_number(participant))
+
+surrogate_data_other <- surrogate_data %>% 
+  rename(
+    HR1 = "HR2",
+    HR2 = "HR1",
+    Resp1 = "Resp2",
+    Resp2 = "Resp1",
+    HR1_change = "HR2_change",
+    HR2_change = "HR1_change",
+    Resp1_change = "Resp2_change",
+    Resp2_change = "Resp1_change"
+  )
+
+hr_change_other <- 
+  gather(surrogate_data_other, # data        
+         participant, HR_change_other, # new vars
+         HR1_change, HR2_change) %>% #old vars
+  select( # drop irrelevant vars
+    actual_time_min, HR_change_other, participant, study, group, condition, trial) %>%
+  mutate( # create unique participant ID
+    participant = parse_number(as.character(group)) * 100 + 
+      parse_number(participant))
+
+resp_change_other <- 
+  gather(surrogate_data_other, # data        
+         participant, Resp_change_other, # new vars
+         Resp1_change, Resp2_change) %>% #old vars
+  select( # drop irrelevant vars
+    actual_time_min, Resp_change_other, participant, study, group, condition, trial) %>%
+  mutate( # create unique participant ID
+    participant = parse_number(as.character(group)) * 100 + 
+      parse_number(participant))
+
+hr_other <- 
+  gather(surrogate_data_other, # data        
+         participant, HR_other, # new vars
+         HR1, HR2) %>% #old vars
+  select( # drop irrelevant vars
+    actual_time_min, HR_other, participant, study, group, condition, trial) %>%
+  mutate( # create unique participant ID
+    participant = parse_number(as.character(group)) * 100 + 
+      parse_number(participant))
+
+resp_other <- 
+  gather(surrogate_data_other, # data        
+         participant, Resp_other, # new vars
+         Resp1, Resp2) %>% #old vars
+  select( # drop irrelevant vars
+    actual_time_min, Resp_other, participant, study, group, condition, trial) %>%
+  mutate( # create unique participant ID
+    participant = parse_number(as.character(group)) * 100 + 
+      parse_number(participant))
+
+dd2 <- cbind(hr_change_self,hr_change_other,resp_change_self,resp_change_other,hr_future,resp_future,hr_self,hr_other,resp_self,resp_other) 
+dd2 <- dd2 %>%  select(actual_time_min,participant,group,condition,trial,study,HR_self,Resp_self,HR_other,Resp_other,HR_future,Resp_future,HR_change_self,HR_change_other,Resp_change_self,Resp_change_other)
+
+#Making participant unique for study
+dd2$participant <- (dd2$study * 1000)+dd2$participant
+
+#Create type variable
+dd2$type <- "surrogate"
+dd$type <- "real"
+
+#Bind the dataframes together
+dd_all <- rbind(dd,dd2)
+#Creating new main effect for other - self
+dd_all$other_self <- (dd_all$HR_other) - (dd_all$HR_self)
+#Subset study 4
+dd_all_4 <- subset(dd_all, study == 4)
 # Create models as in chunks above, but adding an interaction with the Real vs. Surrogate variable (exclude shuffled ones for simplicity)
+model_surrogate <- lmer(HR_change_self ~ 0 + (condition + (HR_self + HR_other):condition):type + 
+                          (1 + condition | group) +        
+                          (1 + condition | participant), 
+                        data = dd_all_4, 
+                        REML = F, 
+                        control = lmerControl(
+                        optimizer = "nloptwrap",
+                        calc.derivs = FALSE,
+                        optCtrl=list(xtol_abs=1e-8, ftol_abs=1e-8, maxfun = 1000)))
+summary(model_surrogate)
+# Model with other-self as main effect
+model_control2 <- lmer(HR_change_self ~ 0 + (condition + (HR_self + other_self):condition):type + 
+                          (1 + condition | group) +        
+                          (1 + condition | participant), 
+                        data = dd_all_4, 
+                        REML = F, 
+                        control = lmerControl(
+                        optimizer = "nloptwrap",
+                        calc.derivs = FALSE,
+                        optCtrl=list(xtol_abs=1e-8, ftol_abs=1e-8, maxfun = 1000)))
 
+summary(model_control2)
 
+# Releveling with conversation as baseline
+dd_all_4$type <- as.factor(dd_all_4$type)
+dd_all_4$type <- relevel(dd_all_4$type, ref = "surrogate")
 
 ```
  
