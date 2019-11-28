@@ -571,11 +571,13 @@ Bonus question: what if we include an additional layer? Is my heart rate just ad
 - to start answering this we can add a column indicating the previous change in hr in the other and one in respiration
 - we can then build on the previous models by also adding the previous change in the other
 
+
 ```{r}
-# Model change as a function of own and other previous state 
-  #stability = beta HR_self
-  #coupling = beta HR_other
-  #baseline = surrogate pairs
+
+### Model change as a function of own and other previous state 
+#stability = beta HR_self
+#coupling = beta HR_other
+#baseline = surrogate pairs
 
 # We only want to analyse study 4 - making a subset of the data
 dd4 <- subset(dd,study == 4)

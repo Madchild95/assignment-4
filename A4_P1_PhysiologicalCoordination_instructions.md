@@ -2439,10 +2439,10 @@ just adjusting to yours, or also to how much you are adjusting to mine?
 change in hr in the other and one in respiration - we can then build on
 the previous models by also adding the previous change in the other
 
-    # Model change as a function of own and other previous state 
-      #stability = beta HR_self
-      #coupling = beta HR_other
-      #baseline = surrogate pairs
+    ### Model change as a function of own and other previous state 
+    #stability = beta HR_self
+    #coupling = beta HR_other
+    #baseline = surrogate pairs
 
     # We only want to analyse study 4 - making a subset of the data
     dd4 <- subset(dd,study == 4)
@@ -2748,8 +2748,6 @@ dataset
 
     ## boundary (singular) fit: see ?isSingular
 
-    ## Warning: Model failed to converge with 1 negative eigenvalue: -3.8e+03
-
     summary(model_1_control)
 
     ## Linear mixed model fit by maximum likelihood . t-tests use
@@ -2759,102 +2757,102 @@ dataset
     ##    Data: dd_shuf_4
     ## 
     ##      AIC      BIC   logLik deviance df.resid 
-    ##  25023.3  25479.4 -12450.6  24901.3    13000 
+    ##  25293.0  25749.2 -12585.5  25171.0    13018 
     ## 
     ## Scaled residuals: 
     ##     Min      1Q  Median      3Q     Max 
-    ## -6.7090 -0.4917  0.0577  0.5622  6.7316 
+    ## -6.6489 -0.4939  0.0584  0.5587  6.6713 
     ## 
     ## Random effects:
     ##  Groups      Name                    Variance  Std.Dev.  Corr             
-    ##  participant (Intercept)             0.000e+00 0.000e+00                  
-    ##              conditionMovementCoop   1.238e-10 1.113e-05   NaN            
-    ##              conditionMovementGuided 9.584e-10 3.096e-05   NaN  0.71      
-    ##              conditionSynchronous    1.069e-09 3.269e-05   NaN  0.54  0.94
-    ##              conditionTurnTaking     3.304e-10 1.818e-05   NaN -0.72 -0.08
-    ##  group       (Intercept)             3.484e-10 1.867e-05                  
-    ##              conditionMovementCoop   1.081e-14 1.040e-07  1.00            
-    ##              conditionMovementGuided 1.732e-09 4.162e-05 -0.67 -0.67      
-    ##              conditionSynchronous    6.504e-10 2.550e-05  0.45  0.45  0.33
-    ##              conditionTurnTaking     4.541e-10 2.131e-05 -0.31 -0.31  0.14
-    ##  Residual                            3.940e-01 6.277e-01                  
+    ##  participant (Intercept)             8.776e-11 9.368e-06                  
+    ##              conditionMovementCoop   6.670e-10 2.583e-05 -1.00            
+    ##              conditionMovementGuided 1.499e-10 1.224e-05 -0.96  0.96      
+    ##              conditionSynchronous    2.646e-10 1.627e-05 -1.00  1.00  0.95
+    ##              conditionTurnTaking     4.605e-10 2.146e-05 -0.99  0.99  0.95
+    ##  group       (Intercept)             0.000e+00 0.000e+00                  
+    ##              conditionMovementCoop   1.287e-11 3.588e-06  NaN             
+    ##              conditionMovementGuided 1.961e-11 4.428e-06  NaN  0.95       
+    ##              conditionSynchronous    1.117e-11 3.343e-06  NaN  0.44  0.51 
+    ##              conditionTurnTaking     3.553e-12 1.885e-06  NaN  0.59  0.77 
+    ##  Residual                            4.012e-01 6.334e-01                  
     ##       
     ##       
     ##       
     ##       
     ##       
-    ##   0.11
+    ##   0.98
     ##       
     ##       
     ##       
     ##       
-    ##  -0.27
+    ##  0.73 
     ##       
-    ## Number of obs: 13061, groups:  participant, 16; group, 8
+    ## Number of obs: 13079, groups:  participant, 16; group, 8
     ## 
     ## Fixed effects:
     ##                                             Estimate Std. Error         df
-    ## (Intercept)                               -1.767e-02  1.631e-02  1.306e+04
-    ## HR_self                                   -3.132e-01  1.825e-02  1.306e+04
-    ## HR_other                                  -1.501e-03  1.786e-02  1.306e+04
-    ## conditionMovementCoop                      4.454e-02  2.898e-02  1.306e+04
-    ## conditionMovementGuided                    2.542e-02  2.645e-02  1.305e+04
-    ## conditionSynchronous                       1.490e-02  2.683e-02  1.305e+04
-    ## conditionTurnTaking                        9.950e-03  2.363e-02  1.306e+04
-    ## typereal                                   2.234e-02  2.117e-02  1.306e+04
-    ## HR_self:conditionMovementCoop              1.048e-01  3.159e-02  1.306e+04
-    ## HR_self:conditionMovementGuided            4.880e-02  2.911e-02  1.306e+04
-    ## HR_self:conditionSynchronous               1.908e-02  2.968e-02  1.306e+04
-    ## HR_self:conditionTurnTaking                3.141e-02  2.615e-02  1.306e+04
-    ## HR_other:conditionMovementCoop            -1.751e-02  3.187e-02  1.306e+04
-    ## HR_other:conditionMovementGuided          -1.074e-02  2.893e-02  1.306e+04
-    ## HR_other:conditionSynchronous              3.284e-02  2.881e-02  1.306e+04
-    ## HR_other:conditionTurnTaking              -4.657e-02  2.523e-02  1.306e+04
-    ## HR_self:typereal                          -7.841e-03  2.366e-02  1.306e+04
-    ## HR_other:typereal                          1.391e-02  2.336e-02  1.306e+04
-    ## conditionMovementCoop:typereal            -3.957e-02  3.769e-02  1.306e+04
-    ## conditionMovementGuided:typereal          -3.070e-02  3.426e-02  1.306e+04
-    ## conditionSynchronous:typereal             -1.420e-02  3.483e-02  1.306e+04
-    ## conditionTurnTaking:typereal              -1.520e-02  3.063e-02  1.306e+04
-    ## HR_self:conditionMovementCoop:typereal    -6.726e-03  4.148e-02  1.306e+04
-    ## HR_self:conditionMovementGuided:typereal  -1.320e-02  3.780e-02  1.306e+04
-    ## HR_self:conditionSynchronous:typereal      3.098e-02  3.843e-02  1.306e+04
-    ## HR_self:conditionTurnTaking:typereal      -1.002e-03  3.386e-02  1.306e+04
-    ## HR_other:conditionMovementCoop:typereal    5.109e-02  4.169e-02  1.306e+04
-    ## HR_other:conditionMovementGuided:typereal  3.764e-02  3.766e-02  1.306e+04
-    ## HR_other:conditionSynchronous:typereal    -5.549e-02  3.776e-02  1.306e+04
-    ## HR_other:conditionTurnTaking:typereal      3.364e-02  3.315e-02  1.306e+04
+    ## (Intercept)                                2.354e-02  1.667e-02  1.308e+04
+    ## HR_self                                   -3.354e-01  1.848e-02  1.308e+04
+    ## HR_other                                  -1.027e-02  1.835e-02  1.308e+04
+    ## conditionMovementCoop                     -1.235e-02  2.952e-02  1.308e+04
+    ## conditionMovementGuided                   -3.343e-02  2.668e-02  1.308e+04
+    ## conditionSynchronous                      -1.184e-02  2.708e-02  1.308e+04
+    ## conditionTurnTaking                       -9.891e-03  2.383e-02  1.308e+04
+    ## typereal                                  -1.887e-02  2.153e-02  1.308e+04
+    ## HR_self:conditionMovementCoop              1.124e-01  3.286e-02  1.308e+04
+    ## HR_self:conditionMovementGuided            4.013e-02  2.954e-02  1.308e+04
+    ## HR_self:conditionSynchronous               4.784e-02  2.962e-02  1.308e+04
+    ## HR_self:conditionTurnTaking                6.201e-02  2.642e-02  1.308e+04
+    ## HR_other:conditionMovementCoop            -1.366e-02  3.221e-02  1.308e+04
+    ## HR_other:conditionMovementGuided          -6.455e-03  2.856e-02  1.308e+04
+    ## HR_other:conditionSynchronous              2.077e-02  2.958e-02  1.308e+04
+    ## HR_other:conditionTurnTaking              -4.333e-02  2.612e-02  1.308e+04
+    ## HR_self:typereal                           1.438e-02  2.393e-02  1.308e+04
+    ## HR_other:typereal                          2.268e-02  2.383e-02  1.308e+04
+    ## conditionMovementCoop:typereal             1.732e-02  3.824e-02  1.308e+04
+    ## conditionMovementGuided:typereal           2.815e-02  3.457e-02  1.308e+04
+    ## conditionSynchronous:typereal              1.254e-02  3.515e-02  1.308e+04
+    ## conditionTurnTaking:typereal               4.637e-03  3.089e-02  1.308e+04
+    ## HR_self:conditionMovementCoop:typereal    -1.431e-02  4.261e-02  1.308e+04
+    ## HR_self:conditionMovementGuided:typereal  -4.534e-03  3.827e-02  1.308e+04
+    ## HR_self:conditionSynchronous:typereal      2.226e-03  3.852e-02  1.308e+04
+    ## HR_self:conditionTurnTaking:typereal      -3.160e-02  3.419e-02  1.308e+04
+    ## HR_other:conditionMovementCoop:typereal    4.724e-02  4.211e-02  1.308e+04
+    ## HR_other:conditionMovementGuided:typereal  3.335e-02  3.751e-02  1.308e+04
+    ## HR_other:conditionSynchronous:typereal    -4.341e-02  3.849e-02  1.308e+04
+    ## HR_other:conditionTurnTaking:typereal      3.040e-02  3.396e-02  1.308e+04
     ##                                           t value Pr(>|t|)    
-    ## (Intercept)                                -1.084 0.278587    
-    ## HR_self                                   -17.160  < 2e-16 ***
-    ## HR_other                                   -0.084 0.933013    
-    ## conditionMovementCoop                       1.537 0.124314    
-    ## conditionMovementGuided                     0.961 0.336587    
-    ## conditionSynchronous                        0.555 0.578678    
-    ## conditionTurnTaking                         0.421 0.673651    
-    ## typereal                                    1.055 0.291352    
-    ## HR_self:conditionMovementCoop               3.317 0.000914 ***
-    ## HR_self:conditionMovementGuided             1.676 0.093717 .  
-    ## HR_self:conditionSynchronous                0.643 0.520318    
-    ## HR_self:conditionTurnTaking                 1.201 0.229823    
-    ## HR_other:conditionMovementCoop             -0.549 0.582735    
-    ## HR_other:conditionMovementGuided           -0.371 0.710361    
-    ## HR_other:conditionSynchronous               1.140 0.254316    
-    ## HR_other:conditionTurnTaking               -1.846 0.064909 .  
-    ## HR_self:typereal                           -0.331 0.740369    
-    ## HR_other:typereal                           0.596 0.551446    
-    ## conditionMovementCoop:typereal             -1.050 0.293667    
-    ## conditionMovementGuided:typereal           -0.896 0.370281    
-    ## conditionSynchronous:typereal              -0.408 0.683535    
-    ## conditionTurnTaking:typereal               -0.496 0.619596    
-    ## HR_self:conditionMovementCoop:typereal     -0.162 0.871197    
-    ## HR_self:conditionMovementGuided:typereal   -0.349 0.726975    
-    ## HR_self:conditionSynchronous:typereal       0.806 0.420146    
-    ## HR_self:conditionTurnTaking:typereal       -0.030 0.976401    
-    ## HR_other:conditionMovementCoop:typereal     1.226 0.220405    
-    ## HR_other:conditionMovementGuided:typereal   0.999 0.317579    
-    ## HR_other:conditionSynchronous:typereal     -1.469 0.141732    
-    ## HR_other:conditionTurnTaking:typereal       1.015 0.310328    
+    ## (Intercept)                                 1.412 0.157924    
+    ## HR_self                                   -18.148  < 2e-16 ***
+    ## HR_other                                   -0.560 0.575749    
+    ## conditionMovementCoop                      -0.418 0.675675    
+    ## conditionMovementGuided                    -1.253 0.210323    
+    ## conditionSynchronous                       -0.437 0.661840    
+    ## conditionTurnTaking                        -0.415 0.678047    
+    ## typereal                                   -0.876 0.380873    
+    ## HR_self:conditionMovementCoop               3.419 0.000631 ***
+    ## HR_self:conditionMovementGuided             1.359 0.174291    
+    ## HR_self:conditionSynchronous                1.615 0.106358    
+    ## HR_self:conditionTurnTaking                 2.347 0.018924 *  
+    ## HR_other:conditionMovementCoop             -0.424 0.671558    
+    ## HR_other:conditionMovementGuided           -0.226 0.821179    
+    ## HR_other:conditionSynchronous               0.702 0.482660    
+    ## HR_other:conditionTurnTaking               -1.659 0.097164 .  
+    ## HR_self:typereal                            0.601 0.547835    
+    ## HR_other:typereal                           0.952 0.341139    
+    ## conditionMovementCoop:typereal              0.453 0.650707    
+    ## conditionMovementGuided:typereal            0.814 0.415501    
+    ## conditionSynchronous:typereal               0.357 0.721272    
+    ## conditionTurnTaking:typereal                0.150 0.880692    
+    ## HR_self:conditionMovementCoop:typereal     -0.336 0.737092    
+    ## HR_self:conditionMovementGuided:typereal   -0.118 0.905691    
+    ## HR_self:conditionSynchronous:typereal       0.058 0.953933    
+    ## HR_self:conditionTurnTaking:typereal       -0.924 0.355369    
+    ## HR_other:conditionMovementCoop:typereal     1.122 0.261921    
+    ## HR_other:conditionMovementGuided:typereal   0.889 0.374035    
+    ## HR_other:conditionSynchronous:typereal     -1.128 0.259427    
+    ## HR_other:conditionTurnTaking:typereal       0.895 0.370802    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -2875,7 +2873,7 @@ dataset
 
     ## boundary (singular) fit: see ?isSingular
 
-    ## Warning: Model failed to converge with 1 negative eigenvalue: -6.1e+02
+    ## Warning: Model failed to converge with 1 negative eigenvalue: -2.4e+02
 
     summary(model_0_control)
 
@@ -2886,82 +2884,82 @@ dataset
     ##    Data: dd_shuf_4
     ## 
     ##      AIC      BIC   logLik deviance df.resid 
-    ##  25006.5  25387.9 -12452.3  24904.5    13010 
+    ##  25276.8  25658.2 -12587.4  25174.8    13028 
     ## 
     ## Scaled residuals: 
     ##     Min      1Q  Median      3Q     Max 
-    ## -6.7007 -0.4917  0.0612  0.5628  6.7298 
+    ## -6.6405 -0.4820  0.0674  0.5674  6.6694 
     ## 
     ## Random effects:
     ##  Groups      Name                    Variance  Std.Dev.  Corr             
-    ##  participant conditionConversation   2.328e-10 1.526e-05                  
-    ##              conditionMovementCoop   4.141e-10 2.035e-05  1.00            
-    ##              conditionMovementGuided 7.977e-10 2.824e-05  0.13  0.13      
-    ##              conditionSynchronous    1.464e-10 1.210e-05  0.78  0.78 -0.34
-    ##              conditionTurnTaking     5.862e-10 2.421e-05  0.38  0.38 -0.07
+    ##  participant conditionConversation   0.000e+00 0.000e+00                  
+    ##              conditionMovementCoop   6.027e-10 2.455e-05   NaN            
+    ##              conditionMovementGuided 2.755e-11 5.249e-06   NaN -0.04      
+    ##              conditionSynchronous    1.669e-10 1.292e-05   NaN  0.80 -0.56
+    ##              conditionTurnTaking     7.358e-10 2.713e-05   NaN  0.95 -0.31
     ##  group       conditionConversation   0.000e+00 0.000e+00                  
-    ##              conditionMovementCoop   2.469e-09 4.969e-05   NaN            
-    ##              conditionMovementGuided 5.443e-10 2.333e-05   NaN  0.96      
-    ##              conditionSynchronous    4.284e-10 2.070e-05   NaN  0.41  0.63
-    ##              conditionTurnTaking     8.827e-12 2.971e-06   NaN -0.36 -0.60
-    ##  Residual                            3.941e-01 6.278e-01                  
+    ##              conditionMovementCoop   3.014e-08 1.736e-04   NaN            
+    ##              conditionMovementGuided 1.453e-10 1.205e-05   NaN -0.52      
+    ##              conditionSynchronous    2.485e-09 4.985e-05   NaN  0.97 -0.73
+    ##              conditionTurnTaking     2.101e-09 4.583e-05   NaN  0.85 -0.86
+    ##  Residual                            4.013e-01 6.335e-01                  
     ##       
     ##       
     ##       
     ##       
     ##       
-    ##   0.41
+    ##   0.89
     ##       
     ##       
     ##       
     ##       
-    ##  -0.92
+    ##   0.95
     ##       
-    ## Number of obs: 13061, groups:  participant, 16; group, 8
+    ## Number of obs: 13079, groups:  participant, 16; group, 8
     ## 
     ## Fixed effects:
     ##                                                 Estimate Std. Error
-    ## HR_self:conditionConversation:typeshuffled    -3.128e-01  1.825e-02
-    ## HR_self:conditionMovementCoop:typeshuffled    -2.084e-01  2.579e-02
-    ## HR_self:conditionMovementGuided:typeshuffled  -2.646e-01  2.267e-02
-    ## HR_self:conditionSynchronous:typeshuffled     -2.941e-01  2.341e-02
-    ## HR_self:conditionTurnTaking:typeshuffled      -2.819e-01  1.873e-02
-    ## HR_self:conditionConversation:typereal        -3.210e-01  1.506e-02
-    ## HR_self:conditionMovementCoop:typereal        -2.230e-01  2.227e-02
-    ## HR_self:conditionMovementGuided:typereal      -2.854e-01  1.882e-02
-    ## HR_self:conditionSynchronous:typereal         -2.710e-01  1.921e-02
-    ## HR_self:conditionTurnTaking:typereal          -2.906e-01  1.537e-02
-    ## HR_other:conditionConversation:typeshuffled   -1.273e-03  1.786e-02
-    ## HR_other:conditionMovementCoop:typeshuffled   -1.972e-02  2.639e-02
-    ## HR_other:conditionMovementGuided:typeshuffled -1.253e-02  2.275e-02
-    ## HR_other:conditionSynchronous:typeshuffled     3.133e-02  2.261e-02
-    ## HR_other:conditionTurnTaking:typeshuffled     -4.841e-02  1.780e-02
-    ## HR_other:conditionConversation:typereal        1.241e-02  1.506e-02
-    ## HR_other:conditionMovementCoop:typereal        4.599e-02  2.227e-02
-    ## HR_other:conditionMovementGuided:typereal      3.931e-02  1.882e-02
-    ## HR_other:conditionSynchronous:typereal        -1.024e-02  1.921e-02
-    ## HR_other:conditionTurnTaking:typereal         -5.166e-04  1.537e-02
+    ## HR_self:conditionConversation:typeshuffled    -3.348e-01  1.848e-02
+    ## HR_self:conditionMovementCoop:typeshuffled    -2.226e-01  2.716e-02
+    ## HR_self:conditionMovementGuided:typeshuffled  -2.955e-01  2.304e-02
+    ## HR_self:conditionSynchronous:typeshuffled     -2.873e-01  2.315e-02
+    ## HR_self:conditionTurnTaking:typeshuffled      -2.730e-01  1.887e-02
+    ## HR_self:conditionConversation:typereal        -3.210e-01  1.520e-02
+    ## HR_self:conditionMovementCoop:typereal        -2.230e-01  2.247e-02
+    ## HR_self:conditionMovementGuided:typereal      -2.854e-01  1.899e-02
+    ## HR_self:conditionSynchronous:typereal         -2.710e-01  1.938e-02
+    ## HR_self:conditionTurnTaking:typereal          -2.906e-01  1.551e-02
+    ## HR_other:conditionConversation:typeshuffled   -1.009e-02  1.836e-02
+    ## HR_other:conditionMovementCoop:typeshuffled   -2.405e-02  2.647e-02
+    ## HR_other:conditionMovementGuided:typeshuffled -1.657e-02  2.188e-02
+    ## HR_other:conditionSynchronous:typeshuffled     9.708e-03  2.316e-02
+    ## HR_other:conditionTurnTaking:typeshuffled     -5.344e-02  1.858e-02
+    ## HR_other:conditionConversation:typereal        1.241e-02  1.520e-02
+    ## HR_other:conditionMovementCoop:typereal        4.599e-02  2.247e-02
+    ## HR_other:conditionMovementGuided:typereal      3.931e-02  1.899e-02
+    ## HR_other:conditionSynchronous:typereal        -1.024e-02  1.938e-02
+    ## HR_other:conditionTurnTaking:typereal         -5.166e-04  1.551e-02
     ##                                                       df t value Pr(>|t|)
-    ## HR_self:conditionConversation:typeshuffled     1.306e+04 -17.139  < 2e-16
-    ## HR_self:conditionMovementCoop:typeshuffled     1.306e+04  -8.079 7.08e-16
-    ## HR_self:conditionMovementGuided:typeshuffled   1.306e+04 -11.673  < 2e-16
-    ## HR_self:conditionSynchronous:typeshuffled      1.306e+04 -12.564  < 2e-16
-    ## HR_self:conditionTurnTaking:typeshuffled       1.306e+04 -15.053  < 2e-16
-    ## HR_self:conditionConversation:typereal         1.306e+04 -21.312  < 2e-16
-    ## HR_self:conditionMovementCoop:typereal         1.306e+04 -10.012  < 2e-16
-    ## HR_self:conditionMovementGuided:typereal       1.306e+04 -15.163  < 2e-16
-    ## HR_self:conditionSynchronous:typereal          1.306e+04 -14.105  < 2e-16
-    ## HR_self:conditionTurnTaking:typereal           1.306e+04 -18.912  < 2e-16
-    ## HR_other:conditionConversation:typeshuffled    1.306e+04  -0.071  0.94316
-    ## HR_other:conditionMovementCoop:typeshuffled    1.306e+04  -0.747  0.45492
-    ## HR_other:conditionMovementGuided:typeshuffled  1.306e+04  -0.551  0.58195
-    ## HR_other:conditionSynchronous:typeshuffled     1.306e+04   1.386  0.16591
-    ## HR_other:conditionTurnTaking:typeshuffled      1.306e+04  -2.719  0.00655
-    ## HR_other:conditionConversation:typereal        1.306e+04   0.824  0.40995
-    ## HR_other:conditionMovementCoop:typereal        1.306e+04   2.065  0.03891
-    ## HR_other:conditionMovementGuided:typereal      1.306e+04   2.088  0.03681
-    ## HR_other:conditionSynchronous:typereal         1.306e+04  -0.533  0.59408
-    ## HR_other:conditionTurnTaking:typereal          1.306e+04  -0.034  0.97318
+    ## HR_self:conditionConversation:typeshuffled     1.308e+04 -18.118  < 2e-16
+    ## HR_self:conditionMovementCoop:typeshuffled     1.308e+04  -8.195 2.74e-16
+    ## HR_self:conditionMovementGuided:typeshuffled   1.308e+04 -12.824  < 2e-16
+    ## HR_self:conditionSynchronous:typeshuffled      1.308e+04 -12.411  < 2e-16
+    ## HR_self:conditionTurnTaking:typeshuffled       1.308e+04 -14.466  < 2e-16
+    ## HR_self:conditionConversation:typereal         1.308e+04 -21.121  < 2e-16
+    ## HR_self:conditionMovementCoop:typereal         1.308e+04  -9.922  < 2e-16
+    ## HR_self:conditionMovementGuided:typereal       1.308e+04 -15.027  < 2e-16
+    ## HR_self:conditionSynchronous:typereal          1.308e+04 -13.978  < 2e-16
+    ## HR_self:conditionTurnTaking:typereal           1.308e+04 -18.742  < 2e-16
+    ## HR_other:conditionConversation:typeshuffled    1.308e+04  -0.550  0.58245
+    ## HR_other:conditionMovementCoop:typeshuffled    1.308e+04  -0.909  0.36353
+    ## HR_other:conditionMovementGuided:typeshuffled  1.308e+04  -0.757  0.44905
+    ## HR_other:conditionSynchronous:typeshuffled     1.308e+04   0.419  0.67504
+    ## HR_other:conditionTurnTaking:typeshuffled      1.308e+04  -2.876  0.00404
+    ## HR_other:conditionConversation:typereal        1.308e+04   0.817  0.41417
+    ## HR_other:conditionMovementCoop:typereal        1.308e+04   2.047  0.04070
+    ## HR_other:conditionMovementGuided:typereal      1.308e+04   2.069  0.03853
+    ## HR_other:conditionSynchronous:typereal         1.308e+04  -0.528  0.59740
+    ## HR_other:conditionTurnTaking:typereal          1.308e+04  -0.033  0.97342
     ##                                                  
     ## HR_self:conditionConversation:typeshuffled    ***
     ## HR_self:conditionMovementCoop:typeshuffled    ***
