@@ -58,11 +58,18 @@ N.B. to give you a bit more data I included data from previous years (Study1, St
 ```{r}
 # Load the libraries
 library(pacman, tidyverse)
-p_load(ggplot2, gridExtra, tidyverse, groupdata2, purr, stats, lme4, lmerTest)
+p_load(ggplot2, gridExtra, tidyverse, groupdata2, purr, stats, lmer4, lmerTest)
+
+#Citation for report
+citation("gridExtra")
+citation("ggplot2")
+citation("groupdata2")
+citation("lmerTest")
+
 
 # Load the file
 s1_t1 <- read.csv("Data/Study1_G1_T1_Synchronous.csv")
-good <- read.csv("Data/Study3_G2_T2_Synchronous.csv")
+
 # Plot
 p1_resp <- ggplot(data = s1_t1) +
   geom_path(aes(time, Resp1, color = "P1")) +
@@ -95,7 +102,7 @@ s1_t1$Resp2_cleaned <- removeOuts(s1_t1$Resp2, threshold)
 s1_t1$HR1_cleaned <- removeOuts(s1_t1$HR1, threshold)
 s1_t1$HR2_cleaned <- removeOuts(s1_t1$HR2, threshold)
 
-#Plotting for cleaned data
+#Plotting for cleaned data respiration
 p1_resp_cleaned <- ggplot(data = s1_t1) +
   geom_path(aes(time, Resp1_cleaned, color = "P1")) +
   geom_path(aes(time, Resp2_cleaned, color = "P2")) +
@@ -103,7 +110,7 @@ p1_resp_cleaned <- ggplot(data = s1_t1) +
   theme(legend.position="bottom")
 p1_resp_cleaned
 
-#Plotting for cleaned data
+#Plotting for cleaned data heart rate
 p1_hr_cleaned <- ggplot(data = s1_t1) +
   geom_path(aes(time, HR1_cleaned, color = "P1")) +
   geom_path(aes(time, HR2_cleaned, color = "P2")) +
@@ -122,7 +129,7 @@ z_scale <- function(column){
 s1_t1_scaled <-s1_t1 %>% dplyr::mutate_at(c("Resp1_cleaned", "Resp2_cleaned", "HR1_cleaned", "HR2_cleaned"),z_scale)
 
 # Plot again to check how scaled data look like
-#Plotting for scaled data
+#Plotting for scaled data respiration
 p1_resp_scaled <- ggplot(data = s1_t1_scaled) +
   geom_path(aes(time, Resp1_cleaned, color = "P1")) +
   geom_path(aes(time, Resp2_cleaned, color = "P2")) +
@@ -130,7 +137,7 @@ p1_resp_scaled <- ggplot(data = s1_t1_scaled) +
   theme(legend.position="bottom")
 p1_resp_scaled
 
-#Plotting for scaled data
+#Plotting for scaled data heart rate
 p1_hr_scaled <- ggplot(data = s1_t1_scaled) +
   geom_path(aes(time, HR1_cleaned, color = "P1")) +
   geom_path(aes(time, HR2_cleaned, color = "P2")) +
@@ -165,9 +172,8 @@ p4
 match <- str_match('Study1_G1_T1_Synchronous.csv', "Study([\\d]+)_G([\\d]+)_T([\\d]+)_([:alpha:]+)")
 x <- c("file", "study", "group", "trial", "condition")
 colnames(match) <- x
-
+# Binding downsampled dataframe with info extracted from the filename
 s1_t1_down <- cbind(s1_t1_down, match)
-## Tip the info is in the file name
 
 
 ```
@@ -185,8 +191,6 @@ A couple of tips:
 
 ```{r}
 ## Remove outliers
-
-### Tip, check the function below
 removeOuts <- function(ts,threshold){
   ts[ts > (mean(ts,na.rm=T) +
              (threshold*sd(ts,na.rm=T)))] = mean(ts,na.rm=T)+threshold*sd(ts,na.rm=T)
@@ -194,10 +198,8 @@ removeOuts <- function(ts,threshold){
              (threshold*sd(ts,na.rm=T)))] = mean(ts,na.rm=T)-threshold*sd(ts,na.rm=T)
   return(ts)
 }
-threshold=3 # Default value at 2.5 sds from the mean
 
 ## Scale
-### Tip: if scale() gives some issues, try the one below
 z_scale <- function(column){
   column_c <- (column - mean(column)) / sd(column)
 }
@@ -253,7 +255,6 @@ data_preprocess <- function(filename, threshold = 3){
 
 # test it on just one file while writing the function
 test_data <- data_preprocess("Data/Study1_G2_T1_TurnTaking.csv")
-test_read <- data_preprocess("Data/Study1_G1_T1_Synchronous.csv")
 
 #  Identify all files to be read
 # Run the function on the whole dataset using map_df
@@ -263,7 +264,7 @@ phys_data <- list.files(path = "/Users/matilde/Desktop/AU/Experimental Methods I
 
 After preprocess we need to assess the data and change some variables
 ```{r}
-phys_data_up <- phys_data
+
 # Making a unique pair ID
 phys_data$study <- as.numeric(phys_data$study)
 phys_data$group <- as.numeric(phys_data$group)
@@ -272,7 +273,7 @@ phys_data$uPairID <- (100 * phys_data$study + phys_data$group)
 
 #Normalizing the time values
 #Assuming that the large values are millisecond
-#choose 400 arbitrarily because it is above a reasonable minute count.
+#choosing 400 arbitrarily because it is above a reasonable minute count.
 phys_data[which(phys_data$time > 400),]$time <- phys_data[which(phys_data$time > 400),]$time / 1000 / 60
  
 #time since 0
@@ -281,22 +282,10 @@ phys_data <- phys_data %>% group_by(uPairID, trial) %>% mutate(actual_time_min =
 # change timename
 colnames(phys_data)[7] <- "time_min"
 
-# Argumentation for why we use 100 as threashold
-overview <- phys_data_up %>% 
-  group_by(file) %>% 
-  summarise(
-    sum(duplicated(Resp1)),
-    sum(duplicated(Resp2)))
-
-overview_down <- phys_data %>% 
-  group_by(file) %>% 
-  summarise(
-    sum(duplicated(Resp1)),
-    sum(duplicated(Resp2)))
 
 # Now we need to make sure all the data are meaningful or something has to be removed
 # E.g. "Study1_G1_T1_Synchronous" has one bad respiration signal. We could replace it with NAs
-summary(phys_data$condition)
+
 # plots plots plots
 phys_data %>% subset(study==4) %>%
   ggplot() + 
@@ -305,12 +294,6 @@ phys_data %>% subset(study==4) %>%
   facet_grid(group ~ trial)
 
 phys_data %>% subset(study==4) %>%
-  ggplot() + 
-  geom_line(aes(actual_time_min,Resp1),color="red") + 
-  geom_line(aes(actual_time_min,Resp2),color="blue") + 
-  facet_grid(group ~ trial)
-
-phys_data_up %>% subset(study==4) %>%
   ggplot() + 
   geom_line(aes(actual_time_min,Resp1),color="red") + 
   geom_line(aes(actual_time_min,Resp2),color="blue") + 
@@ -341,8 +324,17 @@ phys_data <- read.csv("physiological_data.csv")
 
 ```
 
-Plotting individual trials
+This is an extra chunk we have put in to show how we decided to set the threshhold for the function removing replications in the respiration data. Note that it is downsampled by 1000
 ```{r}
+# Argumentation for why we use 8 as threashold
+overview <- phys_data %>% 
+  group_by(file) %>% 
+  summarise(
+    sum(duplicated(Resp1)),
+    sum(duplicated(Resp2)))
+
+#We plot some of the files from the overview table to assess if it is a resonable threshhold to put
+
 bad1 <- data_preprocess("Data/Study2_G7_T3_TurnTaking.csv")
 bad2 <- data_preprocess("Data/Study1_G1_T2_TurnTaking.csv")
 bad3 <- data_preprocess("Data/Study1_G1_T1_Synchronous.csv")
@@ -399,7 +391,7 @@ p_good <- ggplot(data = good) +
   geom_path(aes(time, Resp2, color = "P2")) +
   labs(x = "time", y = "Resp") +
   theme(legend.position="bottom")
-p_good
+
 plot_collection <- gridExtra::grid.arrange(p2, p3, p4, p5, p6, p7)
 gridExtra::grid.arrange(p2,p_good)
 grid.arrange(arrangeGrob(p2, top="Bad plot"), arrangeGrob(p_good, top="Good plot"))
@@ -419,18 +411,9 @@ We need to turn the data into a long format:
 - a column indicating other hr and one other respiration
 - a column indicating change in hr from previous round and one in respiration
 
-We can then run an analysis where change is a function of one's previous state (stability, see slides), and the other's previous state (coupling). Make sure to:
-- set up the most interesting contrasts: how do these parameters vary by condition? which condition should be baseline?
-- set up the right random effects.
-- N.B. the model will be slow. Make sure it works on a subset of the data first!
-
-Bonus question: what if we include an additional layer? Is my heart rate just adjusting to yours, or also to how much you are adjusting to mine?
-- to start answering this we can add a column indicating the previous change in hr in the other and one in respiration
-- we can then build on the previous models by also adding the previous change in the other
-
 
 ```{r}
-phys_data <- read.csv("physiological_data.csv")
+
 #lme4 can do a trick to invert betas by adding - 1  
 # Genearate a column for each: previous HR1, HR2, Resp1, Resp2
 phys_data$study <- as.numeric(phys_data$study)
@@ -439,19 +422,11 @@ phys_data$trial <- as.numeric(phys_data$trial)
 
 phys_data <- phys_data %>% 
   group_by(group, study, trial) %>%
-  mutate(HR1_future = lead(HR1, 1))
-
-phys_data <- phys_data %>% 
-  group_by(group, study, trial) %>%
-  mutate(HR2_future = lead(HR2, 1))
-
-phys_data <- phys_data %>% 
-  group_by(group, study, trial) %>%
-  mutate(Resp1_future = lead(Resp1, 1))
-
-phys_data <- phys_data %>% 
-  group_by(group, study, trial) %>%
-  mutate(Resp2_future = lead(Resp2, 1))
+  mutate(
+    HR1_future = lead(HR1, 1),
+    HR2_future = lead(HR2, 1),
+    Resp1_future = lead(Resp1, 1),
+    Resp2_future = lead(Resp2, 1))
 
 # Genearate a column for each: change in HR1, HR2, Resp1, Resp2
 ## create variable for future HR1 and HR2 (HR1_future, HR2_future), using lag(x-1), group by study/trial/condition, use mutate to put it in the same function
@@ -578,60 +553,71 @@ d_resp_other <-
     participant = parse_number(as.character(group)) * 100 + 
       parse_number(participant))
 
-dd <- cbind(d_hr_change_self,d_hr_change_other,d_resp_change_self,d_resp_change_other,d_hr_future,d_resp_future,d_hr_self,d_hr_other,d_resp_self,d_resp_other) 
+#Binding together all the dataframes created above
+dd <- cbind(d_hr_change_self,d_hr_change_other,d_resp_change_self,d_resp_change_other,d_hr_future,d_resp_future,d_hr_self,d_hr_other,d_resp_self,d_resp_other)
+#Selecting only the relevant columns
 dd <- dd %>%  select(actual_time_min,participant,group,condition,trial,study,HR_self,Resp_self,HR_other,Resp_other,HR_future,Resp_future,HR_change_self,HR_change_other,Resp_change_self,Resp_change_other)
 #Making participant unique for study
 dd$participant <- (dd$study * 1000)+dd$participant
 
-# Set the most interesting contrast e.g. by defining synchronous or conversation as the baseline
-# We only want to analyse study 4 - making a subset of the data
-dd4 <- subset(dd,study == 4)
-# Releveling with conversation as baseline
-dd4$condition <- as.factor(dd4$condition)
-dd4$condition <- relevel(dd4$condition, ref = "Conversation")
+```
 
-ggplot(dd_single, aes(HR_self,HR_change_self)) +
-  geom_smooth(aes(HR_self, HR_other, method = "lm"))
-# effects
-# Plotting for single participant
-ggplot(data = dd_single, aes(x = HR_other, y = HR_change_self)) + geom_smooth(aes(HR_self, HR_other, method = "lm"))
-ggplot(data = dd_single) +
-  geom_point(aes(HR_self, HR_change_self, color = "HR_self")) +
-  geom_point(aes(HR_other, HR_change_self, color = "HR_other")) +
-  geom_smooth(aes(HR_self, HR_change_self, method = "lm", color = "HR_self")) +
-  geom_smooth(aes(HR_other, HR_change_self, method = "lm", color = "HR_other")) +
-  labs(x = "HR", y = "HR_change") +
-  theme(legend.position="bottom")  
-              
+We can then run an analysis where change is a function of one's previous state (stability, see slides), and the other's previous state (coupling). Make sure to:
+- set up the most interesting contrasts: how do these parameters vary by condition? which condition should be baseline?
+- set up the right random effects.
+- N.B. the model will be slow. Make sure it works on a subset of the data first!
+
+Bonus question: what if we include an additional layer? Is my heart rate just adjusting to yours, or also to how much you are adjusting to mine?
+- to start answering this we can add a column indicating the previous change in hr in the other and one in respiration
+- we can then build on the previous models by also adding the previous change in the other
+
+```{r}
 # Model change as a function of own and other previous state 
   #stability = beta HR_self
   #coupling = beta HR_other
   #baseline = surrogate pairs
 
+# We only want to analyse study 4 - making a subset of the data
+dd4 <- subset(dd,study == 4)
+
+##Trying out a model of a single participant...because of slides.
 #Subset single participant 101
 dd_single <- subset(dd4, participant == 4101)
 
 #Single participant
 single_model1 <- lm(HR_change_self ~ 1 + HR_self + HR_other, data = dd_single)
 single_model1
+
+##And then for a single group
 #Subset single group and run model
 dd_group1 <- subset(dd4, group == 1)
 model_group1 <- lmer(HR_change_self ~ 0 + condition + (HR_self + HR_other) : condition + 
                           (0 + condition | participant), data = dd_group1)
 
-#Model for study 4 only
+model_group1
+
+##And now for the real models
+# Set the most interesting contrast e.g. by defining synchronous or conversation as the baseline
+# Releveling with conversation as baseline
+dd4$condition <- as.factor(dd4$condition)
+dd4$condition <- relevel(dd4$condition, ref = "Conversation")
+
+###Model for study 4 only
+
+#Creating a +0 model for assessing beta values for quantification of coordination
 model_study4 <- lmer(HR_change_self ~ 0 + condition + (HR_self + HR_other) : condition + 
                           #we tell the model that we are not all the same. Accouting for independance of the                           data. Plus we are doing partial pooling.
                           (0 + condition | group) +        
                           (0 + condition | participant), data = dd4)
-#Model from interaction effect
+summary(model_study4)
+
+#Creating a +1 model to assess whether coordination is higher than baseline (here being the condition conversation)
 model_study4_interaction <- lmer(HR_change_self ~ 1 + condition + (HR_self + HR_other) * condition + 
                           #we tell the model that we are not all the same. Accouting for independance of the                           data. Plus we are doing partial pooling.
                           (1 + condition | group) +        
                           (1 + condition | participant), data = dd4)
-summary(model_study4)
+
 summary(model_study4_interaction)
-#alternative main effect instead of HR_other = HR_other-self
 
 # Bonus points: Add to the previous model also change in the other to see whether my adaptation is influenced by the other's adaptation.
 
@@ -649,14 +635,44 @@ Tip: sample() is your friend, but make sure to shuffle things within participant
  
 ```{r}
 
-# Create a shuffled dataset
+## Create a shuffled dataset
+# Shuffled dataframe
+shuffled <- dd
+# Sample the relevant variables
+shuffled$HR_other <- sample(shuffled$HR_other, replace = T)
+shuffled$Resp_other <- sample(shuffled$Resp_other, replace = T)
+# Create variable type
+dd$type <- 'real'
+shuffled$type <- 'shuffled'
+dd_shuf_type <- rbind(dd,shuffled)
 
+## Create the same models as in the previous chunk, but adding an interaction by shuffled vs. real
+# We only want to analyse study 4 - making a subset of the data
+dd_shuf_4 <- subset(dd_shuf_type,study == 4)
+# Set the most interesting contrast e.g. by defining synchronous or conversation as the baseline
+dd_shuf_4$condition <- relevel(dd_shuf_4$condition, ref = "Conversation")
+# Relevel type
+dd_shuf_4$type <- as.factor(dd_shuf_4$type)
+dd_shuf_4$type <- relevel(dd_shuf_4$type, ref = "shuffled")
+# Models
+model_1_control <- lmer(HR_change_self ~ 
+  1 + ((HR_self + HR_other) * condition) * type + 
+  (1 + condition | participant) + 
+  (1 + condition | group),
+  data = dd_shuf_4,
+  REML = F)
+summary(model_1_control)
+
+model_0_control <- lmer(HR_change_self ~ 
+  0 + ((HR_self + HR_other) : condition) : type + 
+  (0 + condition | participant) +
+  (0 + condition | group),
+  data = dd_shuf_4,
+  REML = F)
+
+summary(model_0_control)
 # Concatenate it to the original dataset (and remember to have a column telling you which is which)
 
-# Create the same models as in the previous chunk, but adding an interaction by shuffled vs. real
-#The baseline by condition might vary by type
-model_control <- lmer(HR_change_self ~ 0 + (condition + (HR_self + HR_other) : condition) : type #surrogate vs. real + 
-                          (0 + condition | participant), data = dd)
 ```
  
  
@@ -831,10 +847,17 @@ dd$type <- "real"
 
 #Bind the dataframes together
 dd_all <- rbind(dd,dd2)
+
+
 #Creating new main effect for other - self
 dd_all$other_self <- (dd_all$HR_other) - (dd_all$HR_self)
 #Subset study 4
 dd_all_4 <- subset(dd_all, study == 4)
+
+# Releveling with conversation as baseline
+dd_all_4$type <- as.factor(dd_all_4$type)
+dd_all_4$type <- relevel(dd_all_4$type, ref = "surrogate")
+
 # Create models as in chunks above, but adding an interaction with the Real vs. Surrogate variable (exclude shuffled ones for simplicity)
 model_surrogate <- lmer(HR_change_self ~ 0 + (condition + (HR_self + HR_other):condition):type + 
                           (1 + condition | group) +        
@@ -846,6 +869,7 @@ model_surrogate <- lmer(HR_change_self ~ 0 + (condition + (HR_self + HR_other):c
                         calc.derivs = FALSE,
                         optCtrl=list(xtol_abs=1e-8, ftol_abs=1e-8, maxfun = 1000)))
 summary(model_surrogate)
+
 # Model with other-self as main effect
 model_control2 <- lmer(HR_change_self ~ 0 + (condition + (HR_self + other_self):condition):type + 
                           (1 + condition | group) +        
@@ -859,9 +883,6 @@ model_control2 <- lmer(HR_change_self ~ 0 + (condition + (HR_self + other_self):
 
 summary(model_control2)
 
-# Releveling with conversation as baseline
-dd_all_4$type <- as.factor(dd_all_4$type)
-dd_all_4$type <- relevel(dd_all_4$type, ref = "surrogate")
 
 ```
  
